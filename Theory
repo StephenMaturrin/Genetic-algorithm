@@ -1,0 +1,71 @@
+http://www.obitko.com/tutorials/genetic-algorithms/crossover-mutation.php
+
+
+    1_[Start] Generate random population of n chromosomes (suitable solutions for the problem)
+
+    2_[Fitness] Evaluate the fitness f(x) of each chromosome x in the population
+
+    3_[New population] Create a new population by repeating following steps until the new population is complete
+
+        3_1_[Selection] Select two parent chromosomes from a population according to their fitness (the better fitness, the bigger chance to be selected)
+            _ Wheel selection
+            _ Ranking
+            _ 10 best and 10 worst (chosen)
+
+
+        3_2_[Crossover] With a crossover probability cross over the parents to form a new offspring (children). If no crossover was performed, offspring is an exact copy of parents.
+        3_3_[Mutation] With a mutation probability mutate new offspring at each locus (position in chromosome).
+        3_4_[Accepting] Place new offspring in a new population
+
+    4_[Replace] Use new generated population for a further run of algorithm
+
+    5_[Test] If the end condition is satisfied, stop, and return the best solution in current population
+
+    6_[Loop] Go to step 2
+
+
+
+
+
+    Hyperparameters :
+               _ % crossover likelihood (80%-95%)
+               _ % mutation likelihood (no really often) ( 100% all the chromosome is changed/ 0% nothing is changed) Best rates reported are about 0.5%-1%.
+               _ % population size 20-30-50-100
+
+
+
+
+    Encoding :
+
+         Direct value encoding can be used in problems, where some complicated value, such as real numbers, are used.
+         Use of binary encoding for this type of problems would be very difficult.
+         In value encoding, every chromosome is a string of some values. Values can be anything connected to problem, form numbers,
+         real numbers or chars to some complicated objects.
+
+
+    Crossover :
+
+        _ Single point crossover :
+            One crossover point is selected, binary string from beginning of chromosome
+            to the crossover point is copied from one parent, the rest is copied from the second parent
+
+        _ Two point crossover :
+            two crossover point are selected, binary string from beginning of chromosome to the first crossover
+            point is copied from one parent, the part from the first to the second crossover point is copied from
+            the second parent and the rest is copied from the first parent
+
+        _ Uniform crossover:
+            bits are randomly copied from the first or from the second parent
+
+
+    Mutation :
+
+        _Change some values randomly
+
+
+
+
+    Tips :
+
+           - Research shows that after some limit (which depends mainly on encoding and the problem)
+             it is not useful to increase population size, because it does not make solving the problem faster.
