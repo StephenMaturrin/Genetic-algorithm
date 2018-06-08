@@ -1,0 +1,75 @@
+import random as rand
+import numpy as np
+from collections import OrderedDict
+
+class induvidual():
+
+    def __init__(self,input_layer,output_layer):
+        self.input_layer = input_layer
+        self.output_layer = output_layer
+        self.learning_rate= 0
+        self.n_layers = []
+        self.NN_ID=[]
+        self.log_individual = {"Fitness": 0, "ID_father": None, "ID_mother": None, "ID_population": None, "NN_ID": None, "layout": None,
+                          "Learning_rate": None}
+
+    def create_individial(self):
+
+        self.learning_rate = np.random.randint(1,10)**-np.random.randint(10)
+        self.NN_ID.append(self.learning_rate)
+
+        self.log_individual.update({"Learning_rate":self.learning_rate})
+        layers = np.random.randint(1,4)
+        self.n_layers.append(self.input_layer)
+        self.NN_ID.append(self.n_layers[-1])
+
+        for i in range(layers):
+            self.n_layers.append(np.random.randint(1,64))
+            self.NN_ID.append(self.n_layers[-1])
+        self.n_layers.append(self.output_layer)
+        self.NN_ID.append(self.n_layers[-1])
+
+        self.log_individual.update({"NN_ID":self.NN_ID})
+        self.log_individual.update({"layout": self.n_layers})
+
+
+
+    def get_gen(self):
+        return self.log_individual
+
+    def update_gen(self,parameter, value):
+        self.log_individual.update({parameter:value})
+
+population = []
+
+def get_fitness(population):
+    fitness = np.random.random()
+    return  fitness
+
+
+for i in range(100):
+
+    population.append(induvidual(input_layer=13, output_layer=1))
+    population[-1].create_individial()
+    print(population)
+
+
+for individual in population:
+    individual.update_gen("Fitness",get_fitness(individual))
+
+    print(individual.get_gen())
+
+
+
+
+
+
+
+
+
+
+
+#
+# the_one.create_individial()
+#
+# print(the_one.log_indivudual)
