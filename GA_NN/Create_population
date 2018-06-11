@@ -1,8 +1,11 @@
 import random as rand
 import numpy as np
 from collections import OrderedDict
-
+import pandas as pd
 class induvidual():
+
+
+#TODO differentiation between equals model
 
     def __init__(self,input_layer,output_layer):
         self.input_layer = input_layer
@@ -31,6 +34,7 @@ class induvidual():
 
         self.log_individual.update({"NN_ID":self.NN_ID})
         self.log_individual.update({"layout": self.n_layers})
+        return self.log_individual
 
 
 
@@ -40,24 +44,61 @@ class induvidual():
     def update_gen(self,parameter, value):
         self.log_individual.update({parameter:value})
 
+    def get_gen(self,parameter):
+        return self.log_individual[parameter]
+
 population = []
+aux_population= {}
+
 
 def get_fitness(population):
-    fitness = np.random.random()
-    return  fitness
+
+    list =[]
+    i =0
+    population_df = pd.DataFrame()
+    for individual in population:
+        list = []
+
+        fitness = np.random.random()
+        list.append(fitness)
+        # print (str(individual.get_gen("NN_ID")))
+        individual.update_gen("Fitness", fitness)
+        # aux_population.update({"Fitness":{str(individual.get_gen("NN_ID")):list(str(fitness))}})
+        aux_population.update({"Fitness": {str(individual.get_gen("NN_ID")): fitness}})
+        df1 = pd.DataFrame(aux_population)
+        # print("df1",df1)
+        population_df= population_df.append(df1)
+    # print(population_df)
+    # df2 = pd.DataFrame(aux_population)
+    return  population_df
+
+def create_population(n_population,input_layer=13, output_layer=1):
+
+    for i in range(n_population):
+        population.append(induvidual(input_layer=input_layer, output_layer=output_layer))
+        population[-1].create_individial()
+    return  population
 
 
-for i in range(100):
 
-    population.append(induvidual(input_layer=13, output_layer=1))
-    population[-1].create_individial()
-    print(population)
+# def evaluate_population(population):
+#     for individual in population:
+#         print(individual.log_individual)
+#         individual.update_gen("Fitness",get_fitness(individual))
+#         print(individual.get_gen())
 
 
-for individual in population:
-    individual.update_gen("Fitness",get_fitness(individual))
+def ranking (population):
+    df = population.sort_values(by='Fitness')
+    return df
 
-    print(individual.get_gen())
+
+population = create_population(100,13,1)
+# population = evaluate_population(population)
+population_fitness = get_fitness(population)
+print(ranking (population_fitness))
+
+
 
 
 
