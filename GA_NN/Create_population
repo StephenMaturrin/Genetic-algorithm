@@ -119,12 +119,55 @@ population = create_population(100,13,1)
 population_fitness = get_fitness(population)
 population_ranked = ranking(population_fitness)
 group1, group2 = selection(population_ranked)
-a = group1["Fitness"].index[0]
-b = group1["Fitness"].iloc[0]
-c = group1["Fitness"]
-print(a)
-print(b)
-print(c)
+
+
+# for index_g1 in range(len(group1)):
+#
+#     induvidual_id_g1  = group1["Fitness"].index[index_g1]
+#     induvidual_id_g1  = induvidual_id_g1 .replace('[', '')
+#     induvidual_id_g1  = induvidual_id_g1 .replace(']', '')
+#     induvidual_id_g1  = induvidual_id_g1 .split(",")
+#     induvidual_id_g1  = np.array([float(i) for i in induvidual_id_g1])
+#
+#
+#     for index_g2 in range(len(group2)):
+#         induvidual_id_g2 = group2["Fitness"].index[index_g1]
+#         induvidual_id_g2 = induvidual_id_g2.replace('[', '')
+#         induvidual_id_g2 = induvidual_id_g2.replace(']', '')
+#         induvidual_id_g2 = induvidual_id_g2.split(",")
+#         induvidual_id_g2 = np.array([float(i) for i in induvidual_id_g2])
+
+
+induvidual_id_g2 = group2["Fitness"].index[0]
+induvidual_id_g2 = induvidual_id_g2.replace('[', '')
+induvidual_id_g2 = induvidual_id_g2.replace(']', '')
+induvidual_id_g2 = induvidual_id_g2.split(",")
+induvidual_id_g2 = np.array([float(i) for i in induvidual_id_g2])
+A2= np.array([i for i in induvidual_id_g2[0:int(len(induvidual_id_g2)/2)]])
+B2= np.array([i for i in induvidual_id_g2[int(len(induvidual_id_g2)/2):len(induvidual_id_g2)]])
+
+print(induvidual_id_g2)
+print(A2)
+print(B2)
+
+print("------------->__________<--------------\n")
+
+induvidual_id_g1 = group1["Fitness"].index[0]
+induvidual_id_g1 = induvidual_id_g1.replace('[', '')
+induvidual_id_g1 = induvidual_id_g1.replace(']', '')
+induvidual_id_g1 = induvidual_id_g1.split(",")
+induvidual_id_g1 = np.array([float(i) for i in induvidual_id_g1])
+A1= np.array([i for i in induvidual_id_g1[0:int(len(induvidual_id_g1)/2)]])
+B1= np.array([i for i in induvidual_id_g1[int(len(induvidual_id_g1)/2):len(induvidual_id_g1)]])
+
+print(induvidual_id_g1)
+print(A1)
+print(B1)
+
+print("------------->____NEW______<--------------\n")
+print(np.concatenate([A2,B1]))
+print(np.concatenate([A1,B2]))
+# print(c)
 
 # print(group2.iloc[0])
 
