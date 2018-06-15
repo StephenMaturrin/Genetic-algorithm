@@ -7,8 +7,9 @@ class induvidual():
 
 #TODO differentiation between equals model
 #TODO may I use objects or dictionaries ?
+#TODO the layers are also features 
 
-    def __init__(self,input_layer,output_layer):
+    def __init__(self,input_layer=12,output_layer=1):
         self.input_layer = input_layer
         self.output_layer = output_layer
         self.learning_rate= 0
@@ -35,6 +36,8 @@ class induvidual():
 
         self.log_individual.update({"NN_ID":self.NN_ID})
         self.log_individual.update({"layout": self.n_layers})
+
+
         return self.log_individual
 
 
@@ -50,77 +53,112 @@ class induvidual():
 
 population = []
 aux_population= {}
+#
+def get_simple_fitness():
+    return  np.random.random()
 
+def create_individual(input_layer,output_layer):
+    learning_rate = np.random.randint(1, 10) ** -np.random.randint(10)
+    layers = np.random.randint(1, 4)
+    n_layers= []
+    n_layers.append(input_layer)
+    NN_ID= []
+    NN_ID.append(learning_rate)
 
-def get_fitness(population):
+    NN_ID.append(n_layers[-1])
 
-    population_df = pd.DataFrame()
-    for individual in population:
+    for i in range(layers):
+        n_layers.append(np.random.randint(1, 64))
+        NN_ID.append(n_layers[-1])
+    n_layers.append(output_layer)
+    NN_ID.append(n_layers[-1])
 
-        list = []
+    individual = {"Fitness": [get_simple_fitness()],
+            "NN_ID": NN_ID,
+            "layout": n_layers,
+            "Learning_rate": [learning_rate]}
 
-        fitness = np.random.random()
-        list.append(fitness)
+    return individual
 
-        individual.update_gen("Fitness", fitness)
-        # print(individual.get_gen("Fitness"))
-
-        aux_population.update({"Fitness": {str(individual.get_gen("NN_ID")): fitness}})
-        df1 = pd.DataFrame(aux_population)
-
-        population_df= population_df.append(df1)
-
-    return  population_df
-
-def create_population(n_population,input_layer=13, output_layer=1):
-
+print(create_individual(12,1))
+# print(pd.DataFrame(create_individual(12,1),index=[0]))
+def create_population_simple(n_population,input_layer=13, output_layer=1):
+    population =[]
     for i in range(n_population):
-        population.append(induvidual(input_layer=input_layer, output_layer=output_layer))
-        population[-1].create_individial()
+        population.append(pd.DataFrame(create_individual(input_layer,output_layer),index=[i]))
+
     return  population
 
-
-
-# def evaluate_population(population):
+#
+# print(create_population_simple(10))
+#
+#
+#
+#
+# def get_fitness(population):
+#
+#     population_df = pd.DataFrame()
 #     for individual in population:
-#         print(individual.log_individual)
-#         individual.update_gen("Fitness",get_fitness(individual))
-#         print(individual.get_gen())
-
-
-def ranking (population):
-    df = population.sort_values(by='Fitness')
-    return df
-
-
-def selection (population):
-
-    return population.head(10),population.tail(10)
-
-
-
-
-def mutation(mut_prob,population):
-
-    return population
-
-
-def crossover (group1,group2):
-
-
-
-
-    return population
-
-
-
-population = create_population(100,13,1)
-# population = evaluate_population(population)
-population_fitness = get_fitness(population)
-population_ranked = ranking(population_fitness)
-group1, group2 = selection(population_ranked)
-
-
+#
+#         list = []
+#
+#         fitness = np.random.random()
+#         list.append(fitness)
+#
+#         individual.update_gen("Fitness", fitness)
+#         # print(individual.get_gen("Fitness"))
+#
+#         aux_population.update({"Fitness": {str(individual.get_gen("NN_ID")): fitness}})
+#         df1 = pd.DataFrame(aux_population)
+#
+#         population_df= population_df.append(df1)
+#
+#     return  population_df
+#
+#
+#
+#
+# # def evaluate_population(population):
+# #     for individual in population:
+# #         print(individual.log_individual)
+# #         individual.update_gen("Fitness",get_fitness(individual))
+# #         print(individual.get_gen())
+#
+#
+# def ranking (population):
+#     df = population.sort_values(by='Fitness')
+#     return df
+#
+#
+# def selection (population):
+#
+#     return population.head(10),population.tail(10)
+#
+#
+#
+#
+# def mutation(mut_prob,population):
+#
+#     return population
+#
+#
+# def crossover (group1,group2):
+#
+#
+#
+#
+#     return population
+#
+#
+#
+# population = create_population(100,13,1)
+#
+# # population = evaluate_population(population)
+# population_fitness = get_fitness(population)
+# population_ranked = ranking(population_fitness)
+# group1, group2 = selection(population_ranked)
+#
+#
 # for index_g1 in range(len(group1)):
 #
 #     induvidual_id_g1  = group1["Fitness"].index[index_g1]
@@ -128,7 +166,8 @@ group1, group2 = selection(population_ranked)
 #     induvidual_id_g1  = induvidual_id_g1 .replace(']', '')
 #     induvidual_id_g1  = induvidual_id_g1 .split(",")
 #     induvidual_id_g1  = np.array([float(i) for i in induvidual_id_g1])
-#
+#     A1 = np.array([i for i in induvidual_id_g1[0:int(len(induvidual_id_g1) / 2)]])
+#     B1 = np.array([i for i in induvidual_id_g1[int(len(induvidual_id_g1) / 2):len(induvidual_id_g1)]])
 #
 #     for index_g2 in range(len(group2)):
 #         induvidual_id_g2 = group2["Fitness"].index[index_g1]
@@ -136,37 +175,46 @@ group1, group2 = selection(population_ranked)
 #         induvidual_id_g2 = induvidual_id_g2.replace(']', '')
 #         induvidual_id_g2 = induvidual_id_g2.split(",")
 #         induvidual_id_g2 = np.array([float(i) for i in induvidual_id_g2])
-
-
-induvidual_id_g2 = group2["Fitness"].index[0]
-induvidual_id_g2 = induvidual_id_g2.replace('[', '')
-induvidual_id_g2 = induvidual_id_g2.replace(']', '')
-induvidual_id_g2 = induvidual_id_g2.split(",")
-induvidual_id_g2 = np.array([float(i) for i in induvidual_id_g2])
-A2= np.array([i for i in induvidual_id_g2[0:int(len(induvidual_id_g2)/2)]])
-B2= np.array([i for i in induvidual_id_g2[int(len(induvidual_id_g2)/2):len(induvidual_id_g2)]])
-
-print(induvidual_id_g2)
-print(A2)
-print(B2)
-
-print("------------->__________<--------------\n")
-
-induvidual_id_g1 = group1["Fitness"].index[0]
-induvidual_id_g1 = induvidual_id_g1.replace('[', '')
-induvidual_id_g1 = induvidual_id_g1.replace(']', '')
-induvidual_id_g1 = induvidual_id_g1.split(",")
-induvidual_id_g1 = np.array([float(i) for i in induvidual_id_g1])
-A1= np.array([i for i in induvidual_id_g1[0:int(len(induvidual_id_g1)/2)]])
-B1= np.array([i for i in induvidual_id_g1[int(len(induvidual_id_g1)/2):len(induvidual_id_g1)]])
-
-print(induvidual_id_g1)
-print(A1)
-print(B1)
-
-print("------------->____NEW______<--------------\n")
-print(np.concatenate([A2,B1]))
-print(np.concatenate([A1,B2]))
+#         A2 = np.array([i for i in induvidual_id_g2[0:int(len(induvidual_id_g2) / 2)]])
+#         B2 = np.array([i for i in induvidual_id_g2[int(len(induvidual_id_g2) / 2):len(induvidual_id_g2)]])
+#
+#         new_indiv_1 = np.concatenate([A2, B1])
+#         new_indiv_2 = np.concatenate([A1, B2])
+#
+#
+# #
+# induvidual_id_g2 = group2["Fitness"].index[0]
+# induvidual_id_g2 = induvidual_id_g2.replace('[', '')
+# induvidual_id_g2 = induvidual_id_g2.replace(']', '')
+# induvidual_id_g2 = induvidual_id_g2.split(",")
+# induvidual_id_g2 = np.array([float(i) for i in induvidual_id_g2])
+# A2= np.array([i for i in induvidual_id_g2[0:int(len(induvidual_id_g2)/2)]])
+# B2= np.array([i for i in induvidual_id_g2[int(len(induvidual_id_g2)/2):len(induvidual_id_g2)]])
+#
+# print(induvidual_id_g2)
+# print(A2)
+# print(B2)
+#
+# print("------------->__________<--------------\n")
+#
+# induvidual_id_g1 = group1["Fitness"].index[0]
+# induvidual_id_g1 = induvidual_id_g1.replace('[', '')
+# induvidual_id_g1 = induvidual_id_g1.replace(']', '')
+# induvidual_id_g1 = induvidual_id_g1.split(",")
+# induvidual_id_g1 = np.array([float(i) for i in induvidual_id_g1])
+# A1= np.array([i for i in induvidual_id_g1[0:int(len(induvidual_id_g1)/2)]])
+# B1= np.array([i for i in induvidual_id_g1[int(len(induvidual_id_g1)/2):len(induvidual_id_g1)]])
+#
+# print(induvidual_id_g1)
+# print(A1)
+# print(B1)
+#
+# print("------------->____NEW______<--------------\n")
+# new_indiv_1 = np.concatenate([A2,B1])
+# new_indiv_2 = np.concatenate([A1,B2])
+#
+# print(new_indiv_1)
+# print(new_indiv_2)
 # print(c)
 
 # print(group2.iloc[0])
