@@ -2,6 +2,9 @@ import random as rand
 import numpy as np
 from collections import OrderedDict
 import pandas as pd
+import os
+from datetime import datetime
+
 class induvidual():
 
 
@@ -57,21 +60,29 @@ aux_population= {}
 def get_simple_fitness():
     return  np.random.random()
 
-def create_individual(input_layer,output_layer):
-    learning_rate = np.random.randint(1, 10) ** -np.random.randint(10)
-    layers = np.random.randint(1, 4)
-    n_layers=[]
-    n_layers.append(input_layer)
-    NN_ID= []
-    NN_ID.append(learning_rate)
+def create_individual(first ,input_layer=None,output_layer=None,NN_ID=None,n_layers=None,learning_rate=None):
+    NN_ID = []
+    if (first ):
+        learning_rate = np.random.randint(1, 10) ** -np.random.randint(10)
+        layers = np.random.randint(1, 4)
+        n_layers=[]
+        n_layers.append(input_layer)
 
-    NN_ID.append(n_layers[-1])
-
-    for i in range(layers):
-        n_layers.append(np.random.randint(1, 64))
+        NN_ID.append(learning_rate)
         NN_ID.append(n_layers[-1])
-    n_layers.append(output_layer)
-    NN_ID.append(n_layers[-1])
+
+        for i in range(layers):
+            n_layers.append(np.random.randint(1, 64))
+            NN_ID.append(n_layers[-1])
+        n_layers.append(output_layer)
+        NN_ID.append(n_layers[-1])
+    else:
+
+
+        NN_ID.append(learning_rate)
+        for i in n_layers:
+            NN_ID.append(i)
+
     # n_layers = np.array(n)
     individual = {"Fitness": [get_simple_fitness()],
             "NN_ID": [[str(i) for i in  NN_ID]],
@@ -80,23 +91,67 @@ def create_individual(input_layer,output_layer):
 
     return individual
 
-# print(create_individual(12,1))
-# print(pd.DataFrame(create_individual(12,1)))
+
+
 
 def create_population_simple(n_population,input_layer=13, output_layer=1):
     population =[]
     for i in range(n_population):
-        population.append(pd.DataFrame(create_individual(input_layer,output_layer)))
+        population.append(pd.DataFrame(create_individual(first=True,input_layer=input_layer,output_layer=output_layer),index=[i]))
 
     return  population
 
+def selection (population):
+
+    return population.head(10),population.tail(10)
+
+
+def ranking (population):
+    df = population.sort_values(by='Fitness')
+    return df
+
+
+def overcrossing (group1,group2):
+    population=[]
+    for index_g1 in range(len(group1)):
+
+        induvidual_id_g1 = group1.NN_ID
+        induvidual_id_g1 = induvidual_id_g1.iloc[index_g1]
+        induvidual_id_g1 = np.array([float(i) for i in induvidual_id_g1])
+        A1 = np.array([i for i in induvidual_id_g1[0:int(len(induvidual_id_g1) / 2)]])
+        B1 = np.array([i for i in induvidual_id_g1[int(len(induvidual_id_g1) / 2):len(induvidual_id_g1)]])
+
+        for index_g2 in range(len(group2)):
+            induvidual_id_g2 = group2.NN_ID
+            induvidual_id_g2 = induvidual_id_g2.iloc[index_g2]
+            induvidual_id_g2 = np.array([float(i) for i in induvidual_id_g2])
+            A2 = np.array([i for i in induvidual_id_g2[0:int(len(induvidual_id_g2) / 2)]])
+            B2 = np.array([i for i in induvidual_id_g2[int(len(induvidual_id_g2) / 2):len(induvidual_id_g2)]])
+
+            new_indiv_1 = np.concatenate([A2, B1])
+            new_indiv_2 = np.concatenate([A1, B2])
+
+            population.append(
+                pd.DataFrame(create_individual(
+                    first=False,
+                    learning_rate=new_indiv_2[0],
+                    n_layers=new_indiv_2[1:])))
+            population.append(
+                pd.DataFrame(create_individual(
+                    first=False,
+                    learning_rate=new_indiv_1[0],
+                    n_layers=new_indiv_1[1:])))
+
+    population = pd.concat(population)
+    now = datetime.utcnow().strftime('%B-%d-%Y-%H:%M:%S')
+    # population.to_csv(os.getcwd()+"/test/{}{}".format(now, ".csv"), sep=';', header=True, float_format='%.6f', index=False)
+    return population
+
 pop = create_population_simple(100)
 pop = pd.concat(pop)
-print(pop)
 
-#
-# df = pd.DataFrame(pop)
-pop.to_csv("pop.csv", sep=';', header=True, float_format='%.6f',index=False)
-# print(create_population_simple(10))
-#
-#
+
+population_ranked = ranking(pop)
+group1, group2 = selection(population_ranked)
+pop = overcrossing(group1,group2)
+print(pop)
