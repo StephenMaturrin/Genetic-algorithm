@@ -1,0 +1,43 @@
+from project.AG import create_population as cp
+
+from project.Testing_things.tmfl_data import Tmfl_datset
+
+from project.Testing_things.create_nn_model import *
+
+
+
+from project import constants  as c
+
+
+pop = cp.create_population_simple(100)
+
+
+
+population_ranked = cp.ranking(pop)
+group1, group2 = cp.selection(population_ranked,n_best=5,n_worst=5)
+pop = cp.overcrossing(group1,group2,0.9)
+pop = cp.mutation(pop,50,mutation_likelihood=0.05)
+
+print(pop)
+
+
+
+dataset = Tmfl_datset()
+# dataset.input_data(path_file="/home/ms255613/BHAG/BHAG/TESTS/Automatic_tests/ANN/input_data/test2.csv")
+
+
+model = NN_model(dataset=dataset,
+                 num_epochs=30000,  # n° repetition
+                 batch_size=256,  # n° input entries
+                 n_layer=[16, 32,32,32, 1.0],
+                 model="Lin_Reg",
+                 activation_fn=tf.nn.elu,
+                 learning_rate=0.01,
+                 optimizer="Adam",
+                 board_metrics=True,
+                 dropout=1,
+                 normalization="L2",
+                 lambd_L1=None,
+                 lambd_L2=0.9
+                 )
+model.train()
