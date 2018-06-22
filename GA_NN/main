@@ -1,3 +1,5 @@
+from sphinx.addnodes import index
+
 from project.AG import create_population as cp
 
 from project.Testing_things.tmfl_data import Tmfl_datset
@@ -13,31 +15,58 @@ pop = cp.create_population_simple(100)
 
 
 
-population_ranked = cp.ranking(pop)
-group1, group2 = cp.selection(population_ranked,n_best=5,n_worst=5)
-pop = cp.overcrossing(group1,group2,0.9)
-pop = cp.mutation(pop,50,mutation_likelihood=0.05)
 
-print(pop)
+# print(pop)
+
+for i in range(99999999):
+    dataset = Tmfl_datset()
+    dataset.input_data(path_file="/input_data/test2.csv")
+
+    for index,row in pop.iterrows():
+        print(index)
+
+        learning_rate = row.Learning_rate
+        n_layers = [int(float(i)) for i in row.layout]
+
+        # print(n_layers)
+        # print(learning_rate)
+        #
+        #
+
+        model = NN_model(dataset=dataset,
+                         num_epochs=10000,  # n° repetition
+                         batch_size=256,  # n° input entries
+                         n_layer=n_layers,
+                         model="Lin_Reg",
+                         activation_fn=tf.nn.elu,
+                         learning_rate=learning_rate,
+                         optimizer="Adam",
+                         board_metrics=False,
+                         dropout=1,
+                         normalization=None,
+                         lambd_L1=None,
+                         lambd_L2=None
+                         )
+        acc,loss= model.train()
+        # # print(type(acc),type(loss))
+        fitness = np.subtract(acc,loss)
+        # print("fitness",fitness)
+        # f = np.random.randint(-10,10)
+        pop['Fitness'].iloc[index]=fitness
+        # row["Fitness"]=f
+        # print(pop)
+        # print(row.Fitness)
+        # print(row.Fitness)
+        # print(pop.iloc[0])
 
 
+    population_ranked = cp.ranking(pop)
 
-dataset = Tmfl_datset()
-# dataset.input_data(path_file="/home/ms255613/BHAG/BHAG/TESTS/Automatic_tests/ANN/input_data/test2.csv")
-
-
-model = NN_model(dataset=dataset,
-                 num_epochs=30000,  # n° repetition
-                 batch_size=256,  # n° input entries
-                 n_layer=[16, 32,32,32, 1.0],
-                 model="Lin_Reg",
-                 activation_fn=tf.nn.elu,
-                 learning_rate=0.01,
-                 optimizer="Adam",
-                 board_metrics=True,
-                 dropout=1,
-                 normalization="L2",
-                 lambd_L1=None,
-                 lambd_L2=0.9
-                 )
-model.train()
+    # print(pop.Fitness)
+    group1, group2 = cp.selection(population_ranked, n_best=5, n_worst=5)
+    print("GROUP1")
+    print(group1)
+    print("GROUP2")
+    print(group2)
+    pop = cp.overcrossing(group1, group2, 0.9)
+    pop = cp.mutation(pop, 50, mutation_likelihood=0.05)
