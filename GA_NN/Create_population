@@ -57,8 +57,7 @@ class induvidual():
 population = []
 aux_population= {}
 #
-def get_simple_fitness():
-    return  np.random.random()
+
 
 def create_individual(first ,input_layer=None,output_layer=None,NN_ID=None,n_layers=None,learning_rate=None):
     NN_ID = []
@@ -84,9 +83,9 @@ def create_individual(first ,input_layer=None,output_layer=None,NN_ID=None,n_lay
             NN_ID.append(i)
 
     # n_layers = np.array(n)
-    individual = {"Fitness": [get_simple_fitness()],
+    individual = {"Fitness": 0,
             "NN_ID": [[str(i) for i in  NN_ID]],
-            "layout": [[str(i) for i in n_layers ]],
+            "layout": [[str(i) for i in n_layers]],
             "Learning_rate": learning_rate}
 
     return individual
@@ -94,12 +93,16 @@ def create_individual(first ,input_layer=None,output_layer=None,NN_ID=None,n_lay
 
 
 
-def create_population_simple(n_population,input_layer=13, output_layer=1):
+
+
+
+
+def create_population_simple(n_population,input_layer=11, output_layer=1):
     population =[]
     for i in range(n_population):
         population.append(pd.DataFrame(create_individual(first=True,input_layer=input_layer,output_layer=output_layer),index=[i]))
 
-    return  population
+    return  pd.concat(population)
 
 def selection (population, n_best,n_worst):
 
@@ -155,8 +158,11 @@ def overcrossing (group1,group2,crossover_likelihood):
                     n_layers=new_indiv_1[1:])))
 
     population = pd.concat(population)
-    # now = datetime.utcnow().strftime('%B-%d-%Y-%H:%M:%S')
-    population.to_csv("original.csv", sep=';', header=True, float_format='%.8f', index=False)
+    now = datetime.utcnow().strftime('%B-%d-%Y-%H:%M:%S')
+    # population.to_csv(os.getcwd() + "/test/{}{}".format(now, ".csv"), sep=';', header=True, float_format='%.8f',
+    #                       index=False)
+    # population.to_csv("original.csv", sep=';', header=True, float_format='%.8f', index=False)
+
     return population
 
 
@@ -164,255 +170,46 @@ def mutation (population,n_population,mutation_likelihood):
     population_mut =[]
     for index in range(n_population):
 
-        print("IN\n", population.iloc[index])
-        if (np.random.rand() < mutation_likelihood):
-            print("MUTADO ")
+        # print("IN\n", population.iloc[index])
+        if (np.random.rand() <= mutation_likelihood):
+            # print("MUTADO ")
 
             ly = np.array([float(i) for i in population.iloc[index].layout])
             population.iloc[index].Learning_rate = population.iloc[index].Learning_rate* np.random.rand()
+            lr = population.iloc[index].Learning_rate
             layer_selected = np.random.randint(1,len(ly)-1)
-            ly[layer_selected]= ly[layer_selected]+ np.random.randint(-ly[layer_selected],ly[layer_selected])
+            ly[layer_selected]= ly[layer_selected]+ np.random.randint(-ly[layer_selected]+1,ly[layer_selected])
+
 
 
 
         else:
             ly =population.iloc[index].layout
             lr = population.iloc[index].Learning_rate
-        print("OUT\n", lr, ly)
+        # print("OUT\n", lr, ly)
         population_mut.append(
                 pd.DataFrame(create_individual(
                     first=False,
                     learning_rate=lr,
-                    n_layers=ly)))
+                    n_layers=ly), index=[index]))
     population_mut= pd.concat(population_mut)
-    population_mut.to_csv("population_mut.csv", sep=';', header=True, float_format='%.8f', index=False)
-    return  population_mut
-
-
-
-    population = pd.concat(population)
     now = datetime.utcnow().strftime('%B-%d-%Y-%H:%M:%S')
-    # population.to_csv(os.getcwd()+"/test/{}{}".format(now, ".csv"), sep=';', header=True, float_format='%.6f', index=False)
-    return population
-
-
-
-
-
-
-
-
-
-pop = create_population_simple(100)
-pop = pd.concat(pop)
-
-
-population_ranked = ranking(pop)
-group1, group2 = selection(population_ranked,n_best=5,n_worst=5)
-pop = overcrossing(group1,group2,0.9)
-pop = mutation(pop,50,mutation_likelihood=0.05)
-
-print(pop)
-
-
+    population_mut.to_csv(os.getcwd()+"/test/{}{}".format(now, ".csv"), sep=';', header=True, float_format='%.8f', index=False)
+    return population_mut
 
 
 #
-# #
-# # #
-# induvidual_id_g2 = group2.NN_ID
-#
-# induvidual_id_g2 = induvidual_id_g2.iloc[0]
-# induvidual_id_g2 = np.array([float(i) for i in induvidual_id_g2])
-# A2= np.array([i for i in induvidual_id_g2[0:int(len(induvidual_id_g2)/2)]])
-# B2= np.array([i for i in induvidual_id_g2[int(len(induvidual_id_g2)/2):len(induvidual_id_g2)]])
-#
-# print(induvidual_id_g2)
-# print(A2)
-# print(B2)
-#
-# # print("------------->__________<--------------\n")
-# #
-# induvidual_id_g1 = group1.NN_ID
-# induvidual_id_g1 = induvidual_id_g1.iloc[0]
-# induvidual_id_g1 = np.array([float(i) for i in induvidual_id_g1])
-# A1= np.array([i for i in induvidual_id_g1[0:int(len(induvidual_id_g1)/2)]])
-# B1= np.array([i for i in induvidual_id_g1[int(len(induvidual_id_g1)/2):len(induvidual_id_g1)]])
-#
-# print(induvidual_id_g1)
-# print(A1)
-# print(B1)
-# #
-# print("------------->____NEW______<--------------\n")
-# new_indiv_1 = np.concatenate([A2,B1])
-# new_indiv_2 = np.concatenate([A1,B2])
-#
-# print(new_indiv_1)
-#
-# print(new_indiv_2)
 #
 #
+# pop = create_population_simple(100)
+# pop = pd.concat(pop)
 #
+#
+# population_ranked = ranking(pop)
+# group1, group2 = selection(population_ranked,n_best=5,n_worst=5)
+# pop = overcrossing(group1,group2,0.9)
+# pop = mutation(pop,50,mutation_likelihood=0.05)
+#
+# print(pop)
 #
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#
-# df = pd.DataFrame(pop)
-# print(create_population_simple(10))
-#
-#
-#
-#
-# def get_fitness(population):
-#
-#     population_df = pd.DataFrame()
-#     for individual in population:
-#
-#         list = []
-#
-#         fitness = np.random.random()
-#         list.append(fitness)
-#
-#         individual.update_gen("Fitness", fitness)
-#         # print(individual.get_gen("Fitness"))
-#
-#         aux_population.update({"Fitness": {str(individual.get_gen("NN_ID")): fitness}})
-#         df1 = pd.DataFrame(aux_population)
-#
-#         population_df= population_df.append(df1)
-#
-#     return  population_df
-#
-#
-#
-#
-# # def evaluate_population(population):
-# #     for individual in population:
-# #         print(individual.log_individual)
-# #         individual.update_gen("Fitness",get_fitness(individual))
-# #         print(individual.get_gen())
-#
-#
-
-#
-#
-
-#
-#
-#
-#
-# def mutation(mut_prob,population):
-#
-#     return population
-#
-#
-# def crossover (group1,group2):
-#
-#
-#
-#
-#     return population
-#
-#
-#
-# population = create_population(100,13,1)
-#
-# # population = evaluate_population(population)
-# population_fitness = get_fitness(population)
-# population_ranked = ranking(population_fitness)
-# group1, group2 = selection(population_ranked)
-#
-#
-# for index_g1 in range(len(group1)):
-#
-#     induvidual_id_g1  = group1["Fitness"].index[index_g1]
-#     induvidual_id_g1  = induvidual_id_g1 .replace('[', '')
-#     induvidual_id_g1  = induvidual_id_g1 .replace(']', '')
-#     induvidual_id_g1  = induvidual_id_g1 .split(",")
-#     induvidual_id_g1  = np.array([float(i) for i in induvidual_id_g1])
-#     A1 = np.array([i for i in induvidual_id_g1[0:int(len(induvidual_id_g1) / 2)]])
-#     B1 = np.array([i for i in induvidual_id_g1[int(len(induvidual_id_g1) / 2):len(induvidual_id_g1)]])
-#
-#     for index_g2 in range(len(group2)):
-#         induvidual_id_g2 = group2["Fitness"].index[index_g1]
-#         induvidual_id_g2 = induvidual_id_g2.replace('[', '')
-#         induvidual_id_g2 = induvidual_id_g2.replace(']', '')
-#         induvidual_id_g2 = induvidual_id_g2.split(",")
-#         induvidual_id_g2 = np.array([float(i) for i in induvidual_id_g2])
-#         A2 = np.array([i for i in induvidual_id_g2[0:int(len(induvidual_id_g2) / 2)]])
-#         B2 = np.array([i for i in induvidual_id_g2[int(len(induvidual_id_g2) / 2):len(induvidual_id_g2)]])
-#
-#         new_indiv_1 = np.concatenate([A2, B1])
-#         new_indiv_2 = np.concatenate([A1, B2])
-#
-#
-# #
-# induvidual_id_g2 = group2["Fitness"].index[0]
-# induvidual_id_g2 = induvidual_id_g2.replace('[', '')
-# induvidual_id_g2 = induvidual_id_g2.replace(']', '')
-# induvidual_id_g2 = induvidual_id_g2.split(",")
-# induvidual_id_g2 = np.array([float(i) for i in induvidual_id_g2])
-# A2= np.array([i for i in induvidual_id_g2[0:int(len(induvidual_id_g2)/2)]])
-# B2= np.array([i for i in induvidual_id_g2[int(len(induvidual_id_g2)/2):len(induvidual_id_g2)]])
-#
-# print(induvidual_id_g2)
-# print(A2)
-# print(B2)
-#
-# print("------------->__________<--------------\n")
-#
-# induvidual_id_g1 = group1["Fitness"].index[0]
-# induvidual_id_g1 = induvidual_id_g1.replace('[', '')
-# induvidual_id_g1 = induvidual_id_g1.replace(']', '')
-# induvidual_id_g1 = induvidual_id_g1.split(",")
-# induvidual_id_g1 = np.array([float(i) for i in induvidual_id_g1])
-# A1= np.array([i for i in induvidual_id_g1[0:int(len(induvidual_id_g1)/2)]])
-# B1= np.array([i for i in induvidual_id_g1[int(len(induvidual_id_g1)/2):len(induvidual_id_g1)]])
-#
-# print(induvidual_id_g1)
-# print(A1)
-# print(B1)
-#
-# print("------------->____NEW______<--------------\n")
-# new_indiv_1 = np.concatenate([A2,B1])
-# new_indiv_2 = np.concatenate([A1,B2])
-#
-# print(new_indiv_1)
-# print(new_indiv_2)
-# print(c)
-
-# print(group2.iloc[0])
-
-
-
-# for individual in population:
-#     print(individual.get_gen("Fitness"))
-#
-
-# for individual in population:
-#     print(individual.log_individual)
-#
-
-
-
-
-
-
-#
-# the_one.create_individial()
-#
-# print(the_one.log_indivudual)
