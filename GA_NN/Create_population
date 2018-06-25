@@ -4,7 +4,7 @@ from collections import OrderedDict
 import pandas as pd
 import os
 from datetime import datetime
-from ms255613_project.generic_functions import  get_logdir
+from project.generic_functions import  get_logdir
 class induvidual():
 
 
@@ -23,7 +23,7 @@ class induvidual():
 
     def create_individial(self):
 
-        self.learning_rate = np.random.randint(1,10)**-np.random.randint(1,10)
+        self.learning_rate = np.random.randint(1,10)**-np.random.randint(1,4)
         self.NN_ID.append(self.learning_rate)
 
         self.log_individual.update({"Learning_rate":self.learning_rate})
@@ -59,11 +59,11 @@ aux_population= {}
 #
 
 
-def create_individual(first ,input_layer=None,output_layer=None,NN_ID=None,n_layers=None,learning_rate=None):
+def create_individual(first, n_layers,n_neurons ,input_layer=None,output_layer=None,NN_ID=None,learning_rate=None):
     NN_ID = []
     if (first ):
-        learning_rate = np.random.randint(1, 10) ** -np.random.randint(1,9)
-        layers = np.random.randint(1, 4)
+        learning_rate = np.random.randint(1, 10) ** -np.random.randint(1,5)
+        layers = np.random.randint(1,n_layers)
         n_layers=[]
         n_layers.append(input_layer)
 
@@ -71,7 +71,7 @@ def create_individual(first ,input_layer=None,output_layer=None,NN_ID=None,n_lay
         NN_ID.append(n_layers[-1])
 
         for i in range(layers):
-            n_layers.append(np.random.randint(1, 64))
+            n_layers.append(np.random.randint(2, n_neurons ))
             NN_ID.append(n_layers[-1])
         n_layers.append(output_layer)
         NN_ID.append(n_layers[-1])
@@ -97,16 +97,16 @@ def create_individual(first ,input_layer=None,output_layer=None,NN_ID=None,n_lay
 
 
 
-def create_population_simple(n_population,input_layer=11, output_layer=1):
+def create_population_simple(n_population, n_layers=4,n_neurons=64,input_layer=12, output_layer=1):
     population =[]
     for i in range(n_population):
-        population.append(pd.DataFrame(create_individual(first=True,input_layer=input_layer,output_layer=output_layer),index=[i]))
+        population.append(pd.DataFrame(create_individual(first=True,n_layers=n_layers, n_neurons=n_neurons,input_layer=input_layer,output_layer=output_layer),index=[i]))
 
     return  pd.concat(population)
 
 def selection (population, n_best,n_worst):
 
-    return population.head(n_best),population.tail(n_worst)
+    return population.head(n_worst),population.tail(n_best)
 
 
 def ranking (population):
@@ -158,7 +158,7 @@ def overcrossing (group1,group2,crossover_likelihood):
                     n_layers=new_indiv_1[1:])))
 
     population = pd.concat(population)
-    now = datetime.utcnow().strftime('%B-%d-%Y-%H:%M:%S')
+    # now = datetime.utcnow().strftime('%B-%d-%Y-%H:%M:%S')
     # population.to_csv(os.getcwd() + "/test/{}{}".format(now, ".csv"), sep=';', header=True, float_format='%.8f',
     #                       index=False)
     # population.to_csv("original.csv", sep=';', header=True, float_format='%.8f', index=False)
@@ -194,9 +194,8 @@ def mutation (population,n_population,mutation_likelihood):
                     n_layers=ly), index=[index]))
     population_mut= pd.concat(population_mut)
     now = datetime.utcnow().strftime('%B-%d-%Y-%H:%M:%S')
-    population_mut.to_csv(os.getcwd()+"/test/{}{}".format(now, ".csv"), sep=';', header=True, float_format='%.8f', index=False)
+    population_mut.to_csv("/AG_log/ite_30000_nl_6_nn_100/{}{}".format(now, ".csv"), sep=';', header=True, float_format='%.8f', index=False)
     return population_mut
-
 
 #
 #
