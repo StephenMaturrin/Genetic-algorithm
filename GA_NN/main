@@ -11,7 +11,7 @@ from project.Testing_things.create_nn_model import *
 from project import constants  as c
 
 
-pop = cp.create_population_simple(100)
+pop = cp.create_population_simple(100,n_layers=6,n_neurons=100)
 
 
 
@@ -20,7 +20,7 @@ pop = cp.create_population_simple(100)
 
 for i in range(99999999):
     dataset = Tmfl_datset()
-    dataset.input_data(path_file="/input_data/test2.csv")
+    dataset.input_data(path_file="ANN/input_data/test2.csv")
 
     for index,row in pop.iterrows():
         print(index)
@@ -33,8 +33,9 @@ for i in range(99999999):
         #
         #
 
+        print(learning_rate,n_layers)
         model = NN_model(dataset=dataset,
-                         num_epochs=10000,  # n° repetition
+                         num_epochs=30000,  # n° repetition
                          batch_size=256,  # n° input entries
                          n_layer=n_layers,
                          model="Lin_Reg",
@@ -63,10 +64,20 @@ for i in range(99999999):
     population_ranked = cp.ranking(pop)
 
     # print(pop.Fitness)
-    group1, group2 = cp.selection(population_ranked, n_best=5, n_worst=5)
+    group1, group2 = cp.selection(population_ranked, n_best=7, n_worst=3)
     print("GROUP1")
     print(group1)
     print("GROUP2")
     print(group2)
+    df = group1.append(group2)
+    now = datetime.utcnow().strftime('%B-%d-%Y-%H:%M:%S')
+
+    path = "ANN/AG_log/ite_30000_nl_6_nn_100"
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+    df.to_csv(path+"/{}{}".format(now,".csv"),
+                          sep=';', header=True, float_format='%.8f', index=False)
+
     pop = cp.overcrossing(group1, group2, 0.9)
     pop = cp.mutation(pop, 50, mutation_likelihood=0.05)
