@@ -118,7 +118,7 @@ def create_population_simple(n_population, n_layers=5,n_neurons=64,input_layer=1
 def selection (population, n_best,n_worst):
     return population.head(n_best), population.tail(n_worst)
     # return population.iloc[:n_best],population.iloc[n_best:n_best+n_worst]
-
+#
 
 def ranking (population):
     df = population.sort_values(by='Fitness',ascending=False)
@@ -127,7 +127,7 @@ def ranking (population):
     return df
 
 # https://www.quora.com/What-is-your-thought-process-when-choosing-a-neural-network-architecture
-def overcrossing (group1,group2,crossover_likelihood):
+def overcrossing (population,group1,group2,crossover_likelihood, pop_final):
 
     # print("group2",group2)
     # print("group1",group1)
@@ -135,88 +135,71 @@ def overcrossing (group1,group2,crossover_likelihood):
     # print(group1)
     selected = group1.append(group2)
     # print("selected",selected)
-
+    selected_len = len(population) - len(selected)+1
     population = []
     bag = []
+
     index = 0
-    for index1 in range(len(selected)):
 
-        induvidual_id_g1 = selected.layout
-        induvidual_id_g1 = induvidual_id_g1.iloc[index1]
-        induvidual_id_g1 = np.array([float(i) for i in induvidual_id_g1])
-        A1 = np.array([i for i in induvidual_id_g1[0:int(len(induvidual_id_g1) / 2)]])
-        B1 = np.array([i for i in induvidual_id_g1[int(len(induvidual_id_g1) / 2):len(induvidual_id_g1)]])
+    selected = selected.layout
 
-        # print("A1",A1)
-        # print("B1", B1)
-        for index2 in range(index1+1,len(selected)):
-            induvidual_id_g2 = selected.layout
-            induvidual_id_g2 = induvidual_id_g2.iloc[index2]
-            induvidual_id_g2 = np.array([float(i) for i in induvidual_id_g2])
+    # print("population_len",len(population))
+    # print("selected_len",selected_len)
+    while  len(population)< pop_final:
+
+
+        induvidual_id_g1 =  selected.sample(1)
+        induvidual_id_g2 = selected.sample(1)
+
+        # print("induvidual_id_g1",induvidual_id_g1,"induvidual_id_g2",induvidual_id_g2)
+        # print(induvidual_id_g2.equals(induvidual_id_g1))
+
+        if ( not induvidual_id_g1.equals(induvidual_id_g2)):
+
+
+            # print("population_len", len(population))
+
+
+
+            induvidual_id_g1 = np.array([float(i) for i in induvidual_id_g1.iloc[0]])
+            A1 = np.array([i for i in induvidual_id_g1[0:int(len(induvidual_id_g1) / 2)]])
+            B1 = np.array([i for i in induvidual_id_g1[int(len(induvidual_id_g1) / 2):len(induvidual_id_g1)]])
+
+            induvidual_id_g2 = np.array([float(i) for i in induvidual_id_g2.iloc[0]])
             A2 = np.array([i for i in induvidual_id_g2[0:int(len(induvidual_id_g2) / 2)]])
             B2 = np.array([i for i in induvidual_id_g2[int(len(induvidual_id_g2) / 2):len(induvidual_id_g2)]])
-            # print("A2", A2)
-            # print("B2", B2)
 
-            #  crossover likelihood(80 % -95 %)
-            # We may want that parents survive in the next generation
-            # In order to do that, we need to give them a likelihood  (a little chance)
-            p=np.random.rand()
-            if ( p< crossover_likelihood):
-                # print ("ENTRE")
+            p = np.random.rand()
+            if (p < crossover_likelihood):
                 new_indiv_1 = np.concatenate([A2, B1])
                 new_indiv_2 = np.concatenate([A1, B2])
             else:
                 new_indiv_1 = induvidual_id_g1
                 new_indiv_2 = induvidual_id_g2
 
-            if new_indiv_1.tolist() not in bag:
-                population.append(
-                    pd.DataFrame(create_individual(
-                        first=False,
-                        learning_rate=0.01,
-                        n_layers=new_indiv_1)))
+            population.append(
+                pd.DataFrame(create_individual(
+                    first=False,
+                    learning_rate=0.01,
+                    n_layers=new_indiv_2)))
 
-                bag.append(new_indiv_2.tolist())
-                # print(len(population))
-
-
-            if new_indiv_2.tolist() not in bag:
-                population.append(
-                    pd.DataFrame(create_individual(
-                        first=False,
-                        n_neurons=64,
-                        learning_rate=0.01,
-                        n_layers=new_indiv_2)))
-                bag.append(new_indiv_2.tolist())
-
-
-                # print(len(population))
-                # print(len(bag))
+            population.append(
+                pd.DataFrame(create_individual(
+                    first=False,
+                    learning_rate=0.01,
+                    n_layers=new_indiv_1)))
 
 
 
-            #
-            # print("P --- > ",p)
-            #
-            # print("new_indiv_2", new_indiv_2)
-            # print("new_indiv_1", new_indiv_1)
-
-
-
-    print("Bag_list", bag )
     population = pd.concat(population)
     population = population.reset_index()
-    # print(len(population))
-    # population = population.drop_duplicates(population)
-    # print(len(population))
-    # print("REINDEX3333333333333333333333333333")
-    # print(population)
+
     now = datetime.utcnow().strftime('%B-%d-%Y-%H:%M:%S')
     population.to_csv(os.getcwd() + "/test/{}{}".format(now, ".csv"), sep=';', header=True, float_format='%.8f',
                       index=False)
     population.to_csv("original.csv", sep=';', header=True, float_format='%.8f', index=False)
-    # print(population)
+    assert pop_final == len(population),print(pop_final,len(population))
+
     return population
 
 
@@ -272,7 +255,7 @@ def overcrossing (group1,group2,crossover_likelihood):
     # return population
 
 
-def mutation (population,n_population,mutation_likelihood):
+def mutation (population,mutation_likelihood):
     population_mut =[]
     for index in range(len(population)):
 
@@ -281,10 +264,21 @@ def mutation (population,n_population,mutation_likelihood):
             # print("MUTADO ")
 
             ly = np.array([float(i) for i in population.iloc[index].layout])
+            # print("mut1",ly)
             population.iloc[index].Learning_rate = population.iloc[index].Learning_rate* np.random.rand()
             lr = population.iloc[index].Learning_rate
             layer_selected = np.random.randint(1,len(ly)-1)
             ly[layer_selected]= ly[layer_selected]+ np.random.randint(-ly[layer_selected]+1,ly[layer_selected])
+
+            # print("mut2",ly )
+            for i in range(1,len(ly)-1):
+                if (np.random.rand() > 0.5):
+                    # print("mut3",ly)
+                    a = float(np.random.randint(2,100))
+                    # print("value",a)
+                    ly = list(ly[0:i]) + list([a]) + list(ly[i:len(ly)])
+                    break
+                    # print("mut4",ly)
 
 
 
@@ -297,14 +291,17 @@ def mutation (population,n_population,mutation_likelihood):
                 pd.DataFrame(create_individual(
                     first=False,
                     learning_rate=lr,
-                    n_layers=ly), index=[index]))
+                    n_layers=ly))) #, index=[index]
 
 
     population_mut= pd.concat(population_mut)
+    path = "/home/tmpext4/ANN/AG_log/no_eli_nn_32/"
+    assert len(population_mut)== len(population),print(len(population_mut),len(population))
 
+    print("FILE --- > "+path)
     now = datetime.utcnow().strftime('%B-%d-%Y-%H:%M:%S')
-    population_mut.to_csv("/home/tmpext4/ms255613/ANN/AG_log/L2/{}{}".format(now, ".csv"), sep=';', header=True, float_format='%.8f', index=False)
-    print("/home/tmpext4/ms255613/ANN/AG_log/L2/")
+    population_mut.to_csv(path + "{}{}".format(now, ".csv"), sep=';', header=True, float_format='%.8f', index=False)
+    # print("/home/tmpext4/ms255613/ANN/AG_log/L2/")
     return population_mut
 
 
