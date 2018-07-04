@@ -1,83 +1,126 @@
 from sphinx.addnodes import index
 
-from project.AG import create_population as cp
+from AG import create_population as cp
 
-from project.Testing_things.tmfl_data import Tmfl_datset
+from Testing_things.tmfl_data import Tmfl_datset
 
-from project.Testing_things.create_nn_model import *
+from Testing_things.create_nn_model import *
 
-
-
+path = "/home/tmpext4ANN/AG_log/no_eli_nn_32"
+print(path)
 from project import constants  as c
 
 
-pop = cp.create_population_simple(100,n_layers=6,n_neurons=100)
-
-
+pop = cp.create_population_simple(100,n_layers=3,n_neurons=36)
 
 
 # print(pop)
 
+
 for i in range(99999999):
     dataset = Tmfl_datset()
-    dataset.input_data(path_file="ANN/input_data/test2.csv")
+    dataset.input_data(path_file="/home/TESTS/Automatic_tests/ANN/input_data/test2.csv")
 
     for index,row in pop.iterrows():
-        print(index)
+        # print(index)
 
         learning_rate = row.Learning_rate
         n_layers = [int(float(i)) for i in row.layout]
 
-        # print(n_layers)
+        print(n_layers)
         # print(learning_rate)
         #
         #
 
-        print(learning_rate,n_layers)
+        # print(learning_rate,n_layers)
         model = NN_model(dataset=dataset,
-                         num_epochs=30000,  # n° repetition
+                         num_epochs=10000,  # n° repetition
                          batch_size=256,  # n° input entries
                          n_layer=n_layers,
                          model="Lin_Reg",
-                         activation_fn=tf.nn.elu,
-                         learning_rate=learning_rate,
+                         activation_fn=tf.nn.relu,
+                         learning_rate=0.1,
                          optimizer="Adam",
                          board_metrics=False,
                          dropout=1,
-                         normalization=None,
+                         normalization="L2",
                          lambd_L1=None,
-                         lambd_L2=None
+                         lambd_L2=0.9,
+                         batch_norm=True
                          )
         acc,loss= model.train()
+        loss =  loss * 0.05
+        fitness = np.subtract(acc, loss)
+        # fitness = np.random.randint(-10, 10)
+
+
+
+
+        pop['Fitness'].iloc[index] = fitness
+
+
+
         # # print(type(acc),type(loss))
-        fitness = np.subtract(acc,loss)
+
         # print("fitness",fitness)
         # f = np.random.randint(-10,10)
-        pop['Fitness'].iloc[index]=fitness
+
         # row["Fitness"]=f
         # print(pop)
         # print(row.Fitness)
         # print(row.Fitness)
         # print(pop.iloc[0])
+    print("#######################POPULATION############################")
 
+    print(pop)
+    print("#######################RANKING############################")
 
     population_ranked = cp.ranking(pop)
 
+    # print(population_ranked)
+
     # print(pop.Fitness)
-    group1, group2 = cp.selection(population_ranked, n_best=7, n_worst=3)
+    group1, group2 = cp.selection(population_ranked, n_best=15, n_worst=5)
+
+
+
     print("GROUP1")
     print(group1)
     print("GROUP2")
     print(group2)
     df = group1.append(group2)
+
+
+
     now = datetime.utcnow().strftime('%B-%d-%Y-%H:%M:%S')
 
-    path = "ANN/AG_log/ite_30000_nl_6_nn_100"
+    # path = "/home/tmpext4/ms255613/ANN/AG_log/L2"
+    # print(path)
     if not os.path.exists(path):
         os.mkdir(path)
 
-    df.to_csv(path+"/{}{}".format(now,".csv"),
+    df.to_csv(path+"/{}{}".format(now,"_g1_g2.csv"),
                           sep=';', header=True, float_format='%.8f', index=False)
 
-    pop = cp.overcrossing(group1, group2, 0.9)
-    pop = cp.mutation(pop, 50, mutation_likelihood=0.05)
+    print("POP", len(pop),"G1", len(group1),"G2", len(group2))
+
+    pop = cp.overcrossing(pop,group1, group2, 0.85,50)
+
+    print("POP", len(pop))
+
+    # print(pop)
+    # print("over",pop)
+    pop = cp.mutation(pop, mutation_likelihood=0.15)
+
+    print("POP_MUT", len(pop))
+
+
+    print("#######################POPULATION_INDEXXXXXXX############################")
+
+
+    pop.reset_index(inplace=True)
+    print("#######################RANKING_INDEXXXXXXX############################")
+
+
+    # print("mutation",pop)
+
