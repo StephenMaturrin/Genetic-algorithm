@@ -57,6 +57,10 @@ http://www.obitko.com/tutorials/genetic-algorithms/crossover-mutation.php
         _ Uniform crossover:
             bits are randomly copied from the first or from the second parent
 
+        _ Parents:
+              It's okay to have one parent breed multiple times, but one parent should
+              never be both the father and mother of a child.
+
 
     Mutation :
 
